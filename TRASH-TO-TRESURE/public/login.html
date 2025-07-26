@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Epilogue%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+
+    <title>Login - Trash to Treasure</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBpr2avp2z4X4BV2rukGYzdDcg-Rj7Yhg8",
+        authDomain: "trash-to-treasure-990bc.firebaseapp.com",
+        projectId: "trash-to-treasure-990bc",
+        storageBucket: "trash-to-treasure-990bc.appspot.com",
+        messagingSenderId: "519045566161",
+        appId: "1:519045566161:web:c544b425a52bbe1a617ff0",
+        measurementId: "G-K11CXLDWKT",
+      };
+
+      try {
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        window.handleLogin = async function (event) {
+          event.preventDefault();
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const errorMessage = document.getElementById("error-message");
+
+          try {
+            const userCredential = await signInWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+            window.location.href = "home.html";
+          } catch (error) {
+            console.error("Login error:", error);
+            if (error.code === "auth/invalid-credential") {
+              errorMessage.textContent =
+                "Invalid email or password. Please try again.";
+            } else if (error.code === "auth/user-not-found") {
+              errorMessage.textContent =
+                "No account found with this email. Please sign up first.";
+            } else if (error.code === "auth/wrong-password") {
+              errorMessage.textContent =
+                "Incorrect password. Please try again.";
+            } else {
+              errorMessage.textContent = "An error occurred. Please try again.";
+            }
+            errorMessage.classList.remove("hidden");
+          }
+        };
+      } catch (error) {
+        console.error("Firebase initialization error:", error);
+        document.getElementById("error-message").textContent =
+          "Failed to initialize Firebase. Please try again later.";
+        document.getElementById("error-message").classList.remove("hidden");
+      }
+    </script>
+  </head>
+  <body>
+    <div class="min-h-screen bg-[#10231c] flex items-center justify-center">
+      <div class="max-w-md w-full space-y-8 p-8 bg-[#17352b] rounded-xl">
+        <div>
+          <h2 class="mt-6 text-center text-3xl font-bold text-white">
+            Sign in to your account
+          </h2>
+          <p class="mt-2 text-center text-sm text-[#8ecdb7]">
+            Welcome back to Trash to Treasure
+          </p>
+        </div>
+        <form class="mt-8 space-y-6" onsubmit="handleLogin(event)">
+          <div class="rounded-md shadow-sm space-y-4">
+            <div>
+              <label for="email" class="sr-only">Email address</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-[#2f6a55] bg-[#214a3c] text-white placeholder-[#8ecdb7] focus:outline-none focus:ring-[#019863] focus:border-[#019863] focus:z-10 sm:text-sm"
+                placeholder="Email address"
+              />
+            </div>
+            <div>
+              <label for="password" class="sr-only">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-[#2f6a55] bg-[#214a3c] text-white placeholder-[#8ecdb7] focus:outline-none focus:ring-[#019863] focus:border-[#019863] focus:z-10 sm:text-sm"
+                placeholder="Password"
+              />
+            </div>
+          </div>
+
+          <div
+            id="error-message"
+            class="hidden text-red-500 text-sm text-center"
+          ></div>
+
+          <div>
+            <button
+              type="submit"
+              class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#019863] hover:bg-[#017a4f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#019863]"
+            >
+              Sign in
+            </button>
+          </div>
+        </form>
+        <div class="text-center">
+          <p class="text-sm text-[#8ecdb7]">
+            Don't have an account?
+            <a
+              href="signup.html"
+              class="font-medium text-[#019863] hover:text-[#017a4f]"
+            >
+              Sign up
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

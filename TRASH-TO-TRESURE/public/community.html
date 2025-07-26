@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Epilogue%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+
+    <title>Community - Trash to Treasure</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBpr2avp2z4X4BV2rukGYzdDcg-Rj7Yhg8",
+        authDomain: "trash-to-treasure-990bc.firebaseapp.com",
+        projectId: "trash-to-treasure-990bc",
+        storageBucket: "trash-to-treasure-990bc.appspot.com",
+        messagingSenderId: "519045566161",
+        appId: "1:519045566161:web:c544b425a52bbe1a617ff0",
+        measurementId: "G-K11CXLDWKT",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // Check authentication state
+      onAuthStateChanged(auth, (user) => {
+        const authButtons = document.getElementById("auth-buttons");
+        const userMenu = document.getElementById("user-menu");
+
+        if (user) {
+          // User is signed in
+          authButtons.classList.add("hidden");
+          userMenu.classList.remove("hidden");
+          document.getElementById("user-name").textContent =
+            user.displayName || user.email;
+        } else {
+          // User is signed out
+          authButtons.classList.remove("hidden");
+          userMenu.classList.add("hidden");
+        }
+      });
+
+      // Handle sign out
+      window.handleSignOut = async function () {
+        try {
+          await signOut(auth);
+          window.location.href = "home.html";
+        } catch (error) {
+          console.error("Error signing out:", error);
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <div
+      class="relative flex size-full min-h-screen flex-col bg-[#10231c] dark group/design-root overflow-x-hidden"
+      style="font-family: Epilogue, 'Noto Sans', sans-serif"
+    >
+      <div class="layout-container flex h-full grow flex-col">
+        <header
+          class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#214a3c] px-10 py-3"
+        >
+          <div class="flex items-center gap-8">
+            <div class="flex items-center gap-4 text-white">
+              <a href="home.html" class="flex items-center gap-4 text-white">
+                <img
+                  src="uploads/thumbnails_logoooo.jpg"
+                  alt="Trash to Treasure Logo"
+                  class="h-10 w-10 object-contain rounded-full bg-white"
+                />
+                <h2
+                  class="text-white text-lg font-bold leading-tight tracking-[-0.015em]"
+                >
+                  Trash to Treasure
+                </h2>
+              </a>
+            </div>
+            <div class="flex items-center gap-9">
+              <a
+                class="text-white text-sm font-medium leading-normal"
+                href="sell.html"
+                >Sell</a
+              >
+              <a
+                class="text-white text-sm font-medium leading-normal"
+                href="community.html"
+                >Community</a
+              >
+              <a
+                class="text-white text-sm font-medium leading-normal"
+                href="resources.html"
+                >Resources</a
+              >
+            </div>
+          </div>
+          <div class="flex flex-1 justify-end gap-8">
+            <label class="flex flex-col min-w-40 !h-10 max-w-64">
+              <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                <div
+                  class="text-[#8ecdb7] flex border-none bg-[#214a3c] items-center justify-center pl-4 rounded-l-lg border-r-0"
+                  data-icon="MagnifyingGlass"
+                  data-size="24px"
+                  data-weight="regular"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24px"
+                    height="24px"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
+                    ></path>
+                  </svg>
+                </div>
+                <input
+                  placeholder="Search"
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#214a3c] focus:border-none h-full placeholder:text-[#8ecdb7] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal"
+                  value=""
+                />
+              </div>
+            </label>
+            <div id="auth-buttons" class="flex gap-2">
+              <button
+                onclick="window.location.href='signup.html'"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#019863] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Sign Up</span>
+              </button>
+              <button
+                onclick="window.location.href='login.html'"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#214a3c] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Login</span>
+              </button>
+            </div>
+            <div id="user-menu" class="hidden">
+              <div class="relative">
+                <button
+                  onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+                  class="flex items-center gap-2 text-white"
+                >
+                  <span id="user-name" class="text-sm font-medium"></span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                    ></path>
+                  </svg>
+                </button>
+                <div
+                  id="user-dropdown"
+                  class="hidden absolute right-0 mt-2 w-48 bg-[#17352b] rounded-lg shadow-lg py-1 z-50"
+                >
+                  <a
+                    href="profile.html"
+                    class="block px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                    >Profile</a
+                  >
+                  <a
+                    href="settings.html"
+                    class="block px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                    >Settings</a
+                  >
+                  <button
+                    onclick="handleSignOut()"
+                    class="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div
+            class="layout-content-container flex flex-col max-w-[960px] flex-1"
+          >
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <p
+                class="text-white tracking-light text-[32px] font-bold leading-tight min-w-72"
+              >
+                Community
+              </p>
+            </div>
+            <div class="grid grid-cols-2 gap-6 p-4">
+              <div class="flex flex-col gap-4">
+                <div class="bg-[#214a3c] rounded-lg p-6">
+                  <h3 class="text-white text-xl font-bold mb-4">
+                    Upcoming Events
+                  </h3>
+                  <div class="space-y-4">
+                    <div class="bg-[#10231c] p-4 rounded-lg">
+                      <h4 class="text-white font-bold">
+                        Community Clean-up Day
+                      </h4>
+                      <p class="text-[#8ecdb7] text-sm">
+                        Saturday, March 15, 2024
+                      </p>
+                      <p class="text-white text-sm mt-2">
+                        Join us for a day of cleaning up our local parks and
+                        streets.
+                      </p>
+                    </div>
+                    <div class="bg-[#10231c] p-4 rounded-lg">
+                      <h4 class="text-white font-bold">Recycling Workshop</h4>
+                      <p class="text-[#8ecdb7] text-sm">
+                        Wednesday, March 20, 2024
+                      </p>
+                      <p class="text-white text-sm mt-2">
+                        Learn about proper recycling techniques and best
+                        practices.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-[#214a3c] rounded-lg p-6">
+                  <h3 class="text-white text-xl font-bold mb-4">
+                    Community Challenges
+                  </h3>
+                  <div class="space-y-4">
+                    <div class="bg-[#10231c] p-4 rounded-lg">
+                      <h4 class="text-white font-bold">
+                        March Recycling Challenge
+                      </h4>
+                      <p class="text-white text-sm mt-2">
+                        Recycle 100kg of materials this month and earn rewards!
+                      </p>
+                      <div class="mt-4">
+                        <div class="w-full bg-[#214a3c] rounded-full h-2">
+                          <div
+                            class="bg-[#019863] h-2 rounded-full"
+                            style="width: 45%"
+                          ></div>
+                        </div>
+                        <p class="text-[#8ecdb7] text-sm mt-2">45% Complete</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-4">
+                <div class="bg-[#214a3c] rounded-lg p-6">
+                  <h3 class="text-white text-xl font-bold mb-4">
+                    Discussion Forum
+                  </h3>
+                  <div class="space-y-4">
+                    <div class="bg-[#10231c] p-4 rounded-lg">
+                      <h4 class="text-white font-bold">
+                        Tips for Better Recycling
+                      </h4>
+                      <p class="text-[#8ecdb7] text-sm">Posted by EcoWarrior</p>
+                      <p class="text-white text-sm mt-2">
+                        Share your best recycling tips and tricks with the
+                        community.
+                      </p>
+                      <div class="flex gap-4 mt-4">
+                        <button
+                          onclick="handleLike(this)"
+                          class="text-[#8ecdb7] text-sm"
+                        >
+                          Like
+                        </button>
+                        <button
+                          onclick="handleComment(this)"
+                          class="text-[#8ecdb7] text-sm"
+                        >
+                          Comment
+                        </button>
+                        <button
+                          onclick="handleShare(this)"
+                          class="text-[#8ecdb7] text-sm"
+                        >
+                          Share
+                        </button>
+                      </div>
+                    </div>
+                    <div class="bg-[#10231c] p-4 rounded-lg">
+                      <h4 class="text-white font-bold">
+                        Local Recycling Centers
+                      </h4>
+                      <p class="text-[#8ecdb7] text-sm">Posted by GreenLife</p>
+                      <p class="text-white text-sm mt-2">
+                        Find and discuss recycling centers in your area.
+                      </p>
+                      <div class="flex gap-4 mt-4">
+                        <button
+                          onclick="handleLike(this)"
+                          class="text-[#8ecdb7] text-sm"
+                        >
+                          Like
+                        </button>
+                        <button
+                          onclick="handleComment(this)"
+                          class="text-[#8ecdb7] text-sm"
+                        >
+                          Comment
+                        </button>
+                        <button
+                          onclick="handleShare(this)"
+                          class="text-[#8ecdb7] text-sm"
+                        >
+                          Share
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-[#214a3c] rounded-lg p-6">
+                  <h3 class="text-white text-xl font-bold mb-4">
+                    Start a Discussion
+                  </h3>
+                  <div class="space-y-4">
+                    <input
+                      placeholder="Title"
+                      class="form-input w-full rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#10231c] focus:border-none h-10 placeholder:text-[#8ecdb7] p-4 text-base font-normal leading-normal"
+                    />
+                    <textarea
+                      placeholder="What's on your mind?"
+                      class="form-input w-full rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#10231c] focus:border-none min-h-24 placeholder:text-[#8ecdb7] p-4 text-base font-normal leading-normal"
+                    ></textarea>
+                    <button
+                      class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#019863] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+                    >
+                      <span class="truncate">Post Discussion</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fixed bottom-8 right-8 z-50">
+      <button
+        onclick="window.location.href='list.html'"
+        class="flex items-center justify-center w-14 h-14 rounded-full bg-[#019863] text-white shadow-lg hover:bg-[#017a4f] transition-colors duration-200"
+        title="View Listed Items"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="currentColor"
+          viewBox="0 0 256 256"
+        >
+          <path
+            d="M96,216a16,16,0,1,1-16-16A16,16,0,0,1,96,216Zm88-16a16,16,0,1,0,16,16A16,16,0,0,0,184,200ZM231.65,74.35l-28.53,92.71A23.89,23.89,0,0,1,180.18,184H84.07A24.11,24.11,0,0,1,61,166.59L24.82,40H8A8,8,0,0,1,8,24H24.82A16.08,16.08,0,0,1,40.21,35.6L48.32,64H224a8,8,0,0,1,7.65,10.35Z"
+          ></path>
+        </svg>
+      </button>
+    </div>
+    <script>
+      function handleLike(button) {
+        button.classList.toggle("text-[#019863]");
+      }
+
+      function handleComment(button) {
+        const post = button.closest(".bg-[#10231c]");
+        const commentSection =
+          post.querySelector(".comment-section") ||
+          document.createElement("div");
+        if (!post.querySelector(".comment-section")) {
+          commentSection.className = "comment-section mt-4";
+          commentSection.innerHTML = `
+            <textarea placeholder="Write a comment..." class="w-full rounded-lg bg-[#214a3c] text-white p-2 mb-2"></textarea>
+            <button onclick="submitComment(this)" class="bg-[#019863] text-white px-4 py-2 rounded-lg">Post Comment</button>
+          `;
+          post.appendChild(commentSection);
+        } else {
+          commentSection.remove();
+        }
+      }
+
+      function handleShare(button) {
+        // Implement share functionality
+        alert("Share functionality coming soon!");
+      }
+
+      function submitComment(button) {
+        const textarea = button.previousElementSibling;
+        const comment = textarea.value;
+        if (comment.trim()) {
+          const commentSection = button.closest(".comment-section");
+          const newComment = document.createElement("div");
+          newComment.className = "bg-[#214a3c] p-2 rounded-lg mt-2";
+          newComment.innerHTML = `
+            <p class="text-white text-sm">${comment}</p>
+            <p class="text-[#8ecdb7] text-xs mt-1">Posted just now</p>
+          `;
+          commentSection.insertBefore(newComment, textarea);
+          textarea.value = "";
+        }
+      }
+    </script>
+  </body>
+</html>

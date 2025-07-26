@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Epilogue%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+
+    <title>Trash To Treasure - Your Listed Items</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBpr2avp2z4X4BV2rukGYzdDcg-Rj7Yhg8",
+        authDomain: "trash-to-treasure-990bc.firebaseapp.com",
+        projectId: "trash-to-treasure-990bc",
+        storageBucket: "trash-to-treasure-990bc.appspot.com",
+        messagingSenderId: "519045566161",
+        appId: "1:519045566161:web:c544b425a52bbe1a617ff0",
+        measurementId: "G-K11CXLDWKT",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+
+      // Check authentication state
+      onAuthStateChanged(window.auth, (user) => {
+        const authButtons = document.getElementById("auth-buttons");
+        const userMenu = document.getElementById("user-menu");
+
+        if (user) {
+          // User is signed in
+          authButtons.classList.add("hidden");
+          userMenu.classList.remove("hidden");
+          document.getElementById("user-name").textContent =
+            user.displayName || user.email;
+          // Load user's listed items
+          loadUserItems(user);
+        } else {
+          // User is signed out
+          authButtons.classList.remove("hidden");
+          userMenu.classList.add("hidden");
+          // Redirect to login page if not authenticated
+          window.location.href = "login.html";
+        }
+      });
+
+      // Handle sign out
+      window.handleSignOut = async function () {
+        try {
+          await signOut(window.auth);
+          window.location.href = "home.html";
+        } catch (error) {
+          console.error("Error signing out:", error);
+        }
+      };
+
+      // Load user's listed items
+      async function loadUserItems(user) {
+        try {
+          const token = await user.getIdToken(true);
+          const response = await fetch(
+            "http://localhost:3000/api/recyclables/user",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              credentials: "include",
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to fetch items");
+          }
+
+          const items = await response.json();
+          displayItems(items);
+        } catch (error) {
+          console.error("Error loading items:", error);
+          const itemsContainer = document.getElementById("items-container");
+          itemsContainer.innerHTML = `
+            <div class="text-center py-8">
+              <p class="text-white text-lg">Error loading items: ${error.message}</p>
+              <button onclick="window.location.reload()" class="text-[#8ecdb7] hover:text-[#019863] mt-4 inline-block">
+                Try Again
+              </button>
+            </div>
+          `;
+        }
+      }
+
+      // Display items in the cart
+      function displayItems(items) {
+        const itemsContainer = document.getElementById("items-container");
+        itemsContainer.innerHTML = "";
+
+        if (items.length === 0) {
+          itemsContainer.innerHTML = `
+            <div class="text-center py-8">
+              <p class="text-white text-lg">No items listed yet.</p>
+              <a href="sell.html" class="text-[#8ecdb7] hover:text-[#019863] mt-4 inline-block">
+                List your first item
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        items.forEach((item) => {
+          const itemElement = document.createElement("div");
+          itemElement.className = "bg-[#214a3c] rounded-lg p-6 mb-4";
+
+          // Format the dates
+          let createdAt = "N/A";
+          let addedToCartAt = "N/A";
+
+          if (item.createdAt && item.createdAt.seconds) {
+            const date = new Date(item.createdAt.seconds * 1000);
+            createdAt = date.toLocaleString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          }
+
+          if (item.addedToCartAt && item.addedToCartAt.seconds) {
+            const date = new Date(item.addedToCartAt.seconds * 1000);
+            addedToCartAt = date.toLocaleString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          }
+
+          itemElement.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h3 class="text-white text-xl font-bold mb-2">${item.title}</h3>
+                <p class="text-[#8ecdb7] mb-2">${item.description}</p>
+                <div class="flex gap-4 text-white">
+                  <p>Quantity: ${item.quantity}kg</p>
+                  <p>Price: $${item.pricePerKg}/kg</p>
+                  <p>Total: $${item.totalPrice}</p>
+                </div>
+                <div class="text-[#8ecdb7] text-sm mt-2 space-y-1">
+                  <p>Listed on: ${createdAt}</p>
+                  <p>Added to cart: ${addedToCartAt}</p>
+                </div>
+              </div>
+              <div class="ml-4">
+                ${
+                  item.images && item.images.length > 0
+                    ? `<img src="${item.images[0]}" alt="${item.title}" class="w-24 h-24 object-cover rounded-lg">`
+                    : `<div class="w-24 h-24 bg-[#17352b] rounded-lg flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#8ecdb7" viewBox="0 0 256 256">
+                        <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216V200H40ZM112,144a32,32,0,1,0-32-32A32,32,0,0,0,112,144Zm0-48a16,16,0,1,1-16,16A16,16,0,0,1,112,96Zm80,96H64a8,8,0,0,1,0-16H192a8,8,0,0,1,0,16Zm0-32H64a8,8,0,0,1,0-16H192a8,8,0,0,1,0,16Z"></path>
+                      </svg>
+                    </div>`
+                }
+              </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+              <span class="px-3 py-1 rounded-full text-sm ${
+                item.status === "available" ? "bg-green-500" : "bg-gray-500"
+              } text-white">
+                ${item.status}
+              </span>
+            </div>
+          `;
+
+          itemsContainer.appendChild(itemElement);
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div
+      class="relative flex size-full min-h-screen flex-col bg-[#10231c] dark group/design-root overflow-x-hidden"
+      style="font-family: Epilogue, 'Noto Sans', sans-serif"
+    >
+      <div class="layout-container flex h-full grow flex-col">
+        <header
+          class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#214a3c] px-10 py-3"
+        >
+          <div class="flex items-center gap-8">
+            <div class="flex items-center gap-4 text-white">
+              <a href="home.html" class="flex items-center gap-4 text-white">
+                <img
+                  src="uploads/thumbnails_logoooo.jpg"
+                  alt="Trash to Treasure Logo"
+                  class="h-10 w-10 object-contain rounded-full bg-white"
+                />
+                <h2
+                  class="text-white text-lg font-bold leading-tight tracking-[-0.015em]"
+                >
+                  Trash to Treasure
+                </h2>
+              </a>
+            </div>
+            <div class="flex items-center gap-9">
+              <a
+                class="text-white text-sm font-medium leading-normal"
+                href="sell.html"
+                >Sell</a
+              >
+              <a
+                class="text-white text-sm font-medium leading-normal"
+                href="community.html"
+                >Community</a
+              >
+              <a
+                class="text-white text-sm font-medium leading-normal"
+                href="resources.html"
+                >Resources</a
+              >
+            </div>
+          </div>
+          <div class="flex flex-1 justify-end gap-8">
+            <div id="auth-buttons" class="flex gap-2">
+              <button
+                onclick="window.location.href='signup.html'"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#019863] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Sign Up</span>
+              </button>
+              <button
+                onclick="window.location.href='login.html'"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#214a3c] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Login</span>
+              </button>
+            </div>
+            <div id="user-menu" class="hidden">
+              <div class="relative">
+                <button
+                  onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+                  class="flex items-center gap-2 text-white"
+                >
+                  <span id="user-name" class="text-sm font-medium"></span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                    ></path>
+                  </svg>
+                </button>
+                <div
+                  id="user-dropdown"
+                  class="hidden absolute right-0 mt-2 w-48 bg-[#17352b] rounded-lg shadow-lg py-1 z-50"
+                >
+                  <a
+                    href="profile.html"
+                    class="block px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                    >Profile</a
+                  >
+                  <a
+                    href="settings.html"
+                    class="block px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                    >Settings</a
+                  >
+                  <button
+                    onclick="handleSignOut()"
+                    class="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div
+            class="layout-content-container flex flex-col max-w-[960px] flex-1"
+          >
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <h1
+                class="text-white tracking-light text-[32px] font-bold leading-tight min-w-72"
+              >
+                Your Listed Items
+              </h1>
+            </div>
+            <div id="items-container" class="mt-4">
+              <!-- Items will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

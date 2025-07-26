@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Epilogue%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+
+    <title>Glass - Trash to Treasure</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBpr2avp2z4X4BV2rukGYzdDcg-Rj7Yhg8",
+        authDomain: "trash-to-treasure-990bc.firebaseapp.com",
+        projectId: "trash-to-treasure-990bc",
+        storageBucket: "trash-to-treasure-990bc.appspot.com",
+        messagingSenderId: "519045566161",
+        appId: "1:519045566161:web:c544b425a52bbe1a617ff0",
+        measurementId: "G-K11CXLDWKT",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // Check authentication state
+      onAuthStateChanged(auth, (user) => {
+        const authButtons = document.getElementById("auth-buttons");
+        const userMenu = document.getElementById("user-menu");
+
+        if (user) {
+          // User is signed in
+          authButtons.classList.add("hidden");
+          userMenu.classList.remove("hidden");
+          document.getElementById("user-name").textContent =
+            user.displayName || user.email;
+        } else {
+          // User is signed out
+          authButtons.classList.remove("hidden");
+          userMenu.classList.add("hidden");
+        }
+      });
+
+      // Handle sign out
+      window.handleSignOut = async function () {
+        try {
+          await signOut(auth);
+          window.location.href = "home.html";
+        } catch (error) {
+          console.error("Error signing out:", error);
+        }
+      };
+    </script>
+    <style>
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #10231c;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      .loader {
+        width: 48px;
+        height: 48px;
+        border: 5px solid #8ecdb7;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        animation: rotation 1s linear infinite;
+      }
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script>
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          document.getElementById("loading-screen").style.display = "none";
+        }, 600);
+      });
+
+      function handleFileUpload(event) {
+        const files = event.target.files;
+        const previewContainer = document.getElementById("preview-container");
+        previewContainer.innerHTML = ""; // Clear existing previews
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const preview = document.createElement("div");
+              preview.className = "relative inline-block m-2";
+              preview.innerHTML = `
+                <img src="${e.target.result}" class="w-24 h-24 object-cover rounded-lg" />
+                <button onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">×</button>
+              `;
+              previewContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+
+      async function handleFormSubmit(event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        formData.append("type", "glass");
+        formData.append(
+          "title",
+          document.querySelector('input[placeholder*="Clear Glass Bottles"]')
+            .value
+        );
+        formData.append(
+          "description",
+          document.querySelector("textarea").value
+        );
+        formData.append(
+          "quantity",
+          document.querySelector('input[placeholder*="10kg"]').value
+        );
+        formData.append(
+          "pricePerKg",
+          document.querySelector('input[placeholder*="$0.50"]').value
+        );
+
+        const fileInput = document.getElementById("file-upload");
+        if (fileInput.files.length > 0) {
+          for (let i = 0; i < fileInput.files.length; i++) {
+            formData.append("images", fileInput.files[i]);
+          }
+        }
+
+        try {
+          const response = await fetch(
+            "http://localhost:3000/api/recyclables",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          const result = await response.json();
+
+          if (response.ok) {
+            alert("Item listed successfully!");
+            // Clear form
+            document.querySelector("form").reset();
+            document.getElementById("preview-container").innerHTML = "";
+          } else {
+            alert("Error: " + result.message);
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Error submitting form. Please try again.");
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="loading-screen">
+      <div class="loader"></div>
+    </div>
+    <div
+      class="relative flex size-full min-h-screen flex-col bg-[#10231c] dark group/design-root overflow-x-hidden"
+      style="font-family: Epilogue, 'Noto Sans', sans-serif"
+    >
+      <div class="layout-container flex h-full grow flex-col">
+        <header
+          class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#214a3c] px-10 py-3"
+        >
+          <div class="flex items-center gap-8">
+            <div class="flex items-center gap-4 text-white">
+              <a href="home.html" class="flex items-center gap-4 text-white">
+                <img
+                  src="uploads/thumbnails_logoooo.jpg"
+                  alt="Trash to Treasure Logo"
+                  class="h-10 w-10 object-contain rounded-full bg-white"
+                />
+                <h2
+                  class="text-white text-lg font-bold leading-tight tracking-[-0.015em]"
+                >
+                  Trash to Treasure
+                </h2>
+              </a>
+            </div>
+            <div class="flex items-center gap-9">
+              <a
+                class="text-white text-sm font-medium leading-normal"
+                href="community.html"
+                >Community</a
+              >
+              <a
+                class="text-white text-sm font-medium leading-normal"
+                href="resources.html"
+                >Resources</a
+              >
+            </div>
+          </div>
+          <div class="flex flex-1 justify-end gap-8">
+            <label class="flex flex-col min-w-40 !h-10 max-w-64">
+              <div class="flex w-full flex-1 items-stretch rounded-xl h-full">
+                <div
+                  class="text-[#8ecdb7] flex border-none bg-[#214a3c] items-center justify-center pl-4 rounded-l-xl border-r-0"
+                  data-icon="MagnifyingGlass"
+                  data-size="24px"
+                  data-weight="regular"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24px"
+                    height="24px"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
+                    ></path>
+                  </svg>
+                </div>
+                <input
+                  placeholder="Search"
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-white focus:outline-0 focus:ring-0 border-none bg-[#214a3c] focus:border-none h-full placeholder:text-[#8ecdb7] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal"
+                  value=""
+                />
+              </div>
+            </label>
+            <div id="auth-buttons" class="flex gap-2">
+              <button
+                onclick="window.location.href='signup.html'"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#019863] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Sign Up</span>
+              </button>
+              <button
+                onclick="window.location.href='login.html'"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#214a3c] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">Login</span>
+              </button>
+            </div>
+            <div id="user-menu" class="hidden">
+              <div class="relative">
+                <button
+                  onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+                  class="flex items-center gap-2 text-white"
+                >
+                  <span id="user-name" class="text-sm font-medium"></span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                    ></path>
+                  </svg>
+                </button>
+                <div
+                  id="user-dropdown"
+                  class="hidden absolute right-0 mt-2 w-48 bg-[#17352b] rounded-lg shadow-lg py-1 z-50"
+                >
+                  <a
+                    href="profile.html"
+                    class="block px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                    >Profile</a
+                  >
+                  <a
+                    href="settings.html"
+                    class="block px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                    >Settings</a
+                  >
+                  <button
+                    onclick="handleSignOut()"
+                    class="block w-full text-left px-4 py-2 text-sm text-white hover:bg-[#214a3c]"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div
+            class="layout-content-container flex flex-col max-w-[960px] flex-1"
+          >
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <p
+                class="text-white tracking-light text-[32px] font-bold leading-tight min-w-72"
+              >
+                Sell Your Recyclables
+              </p>
+            </div>
+            <div class="pb-3">
+              <div class="flex border-b border-[#2f6a55] px-4 gap-8">
+                <a
+                  class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8ecdb7] pb-[13px] pt-4"
+                  href="plastic.html"
+                >
+                  <p
+                    class="text-[#8ecdb7] text-sm font-bold leading-normal tracking-[0.015em]"
+                  >
+                    Plastic
+                  </p>
+                </a>
+                <a
+                  class="flex flex-col items-center justify-center border-b-[3px] border-b-[#019863] text-white pb-[13px] pt-4"
+                  href="glass.html"
+                >
+                  <p
+                    class="text-white text-sm font-bold leading-normal tracking-[0.015em]"
+                  >
+                    Glass
+                  </p>
+                </a>
+                <a
+                  class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8ecdb7] pb-[13px] pt-4"
+                  href="paper.html"
+                >
+                  <p
+                    class="text-[#8ecdb7] text-sm font-bold leading-normal tracking-[0.015em]"
+                  >
+                    Paper
+                  </p>
+                </a>
+                <a
+                  class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-[#8ecdb7] pb-[13px] pt-4"
+                  href="organic.html"
+                >
+                  <p
+                    class="text-[#8ecdb7] text-sm font-bold leading-normal tracking-[0.015em]"
+                  >
+                    Organic Waste
+                  </p>
+                </a>
+              </div>
+            </div>
+            <h2
+              class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5"
+            >
+              List Your Glass Recyclables
+            </h2>
+            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+              <label class="flex flex-col min-w-40 flex-1">
+                <p class="text-white text-base font-medium leading-normal pb-2">
+                  Item Title
+                </p>
+                <input
+                  placeholder="e.g., Clear Glass Bottles, Colored Glass Jars"
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#214a3c] focus:border-none h-14 placeholder:text-[#8ecdb7] p-4 text-base font-normal leading-normal"
+                  value=""
+                />
+              </label>
+            </div>
+            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+              <label class="flex flex-col min-w-40 flex-1">
+                <p class="text-white text-base font-medium leading-normal pb-2">
+                  Description
+                </p>
+                <textarea
+                  placeholder="Provide details about the glass recyclables, such as type (clear/colored), quantity, condition, and any specific requirements."
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#214a3c] focus:border-none min-h-36 placeholder:text-[#8ecdb7] p-4 text-base font-normal leading-normal"
+                ></textarea>
+              </label>
+            </div>
+            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+              <label class="flex flex-col min-w-40 flex-1">
+                <p class="text-white text-base font-medium leading-normal pb-2">
+                  Quantity (in kg)
+                </p>
+                <input
+                  placeholder="e.g., 10kg, 25kg"
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#214a3c] focus:border-none h-14 placeholder:text-[#8ecdb7] p-4 text-base font-normal leading-normal"
+                  value=""
+                />
+              </label>
+            </div>
+            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+              <label class="flex flex-col min-w-40 flex-1">
+                <p class="text-white text-base font-medium leading-normal pb-2">
+                  Price per kg
+                </p>
+                <input
+                  placeholder="e.g., $0.50, $1.00"
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#214a3c] focus:border-none h-14 placeholder:text-[#8ecdb7] p-4 text-base font-normal leading-normal"
+                  value=""
+                />
+              </label>
+            </div>
+            <div class="flex flex-col p-4">
+              <div
+                class="flex flex-col items-center gap-6 rounded-lg border-2 border-dashed border-[#2f6a55] px-6 py-14"
+              >
+                <div class="flex max-w-[480px] flex-col items-center gap-2">
+                  <p
+                    class="text-white text-lg font-bold leading-tight tracking-[-0.015em] max-w-[480px] text-center"
+                  >
+                    Upload Images
+                  </p>
+                  <p
+                    class="text-white text-sm font-normal leading-normal max-w-[480px] text-center"
+                  >
+                    Add clear images of the glass recyclables to attract buyers.
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onchange="handleFileUpload(event)"
+                  class="hidden"
+                  id="file-upload"
+                />
+                <button
+                  onclick="document.getElementById('file-upload').click()"
+                  class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#214a3c] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+                >
+                  <span class="truncate">Upload Images</span>
+                </button>
+                <div
+                  id="preview-container"
+                  class="flex flex-wrap justify-center gap-2 mt-4"
+                ></div>
+              </div>
+            </div>
+            <div class="flex px-4 py-3 justify-end">
+              <button
+                onclick="handleFormSubmit(event)"
+                class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#019863] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span class="truncate">List Item for Sale</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <div class="fixed bottom-8 right-8 z-50">
+    <button
+      onclick="window.location.href='list.html'"
+      class="flex items-center justify-center w-14 h-14 rounded-full bg-[#019863] text-white shadow-lg hover:bg-[#017a4f] transition-colors duration-200"
+      title="View Listed Items"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="currentColor"
+        viewBox="0 0 256 256"
+      >
+        <path
+          d="M96,216a16,16,0,1,1-16-16A16,16,0,0,1,96,216Zm88-16a16,16,0,1,0,16,16A16,16,0,0,0,184,200ZM231.65,74.35l-28.53,92.71A23.89,23.89,0,0,1,180.18,184H84.07A24.11,24.11,0,0,1,61,166.59L24.82,40H8A8,8,0,0,1,8,24H24.82A16.08,16.08,0,0,1,40.21,35.6L48.32,64H224a8,8,0,0,1,7.65,10.35Z"
+        ></path>
+      </svg>
+    </button>
+  </div>
+</html>
