@@ -1,0 +1,11 @@
+[build]
+  base = "TRASH-TO-TRESURE"
+  command = "npm install"
+  publish = "public"
+
+[dev]
+  base = "TRASH-TO-TRESURE"
+  command = "npm start"
+  targetPort = 3000
+  port = 8888
+  autoLaunch = false
