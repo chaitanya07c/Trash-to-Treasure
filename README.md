@@ -21,6 +21,7 @@ We developed this application using a variety of web technologies, constantly le
 ## 🎥 See It in Action
 
 ▶️ [Watch the Project Demo on YouTube](https://www.youtube.com/watch?v=FBcxvvRCfDg)
+
 🌐 [Live ](https://trash-to-treasure.netlify.app/)
 
 ---
