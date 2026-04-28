@@ -1,0 +1,33 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: ["my-branch"]
+  pull_request:
+    branches: ["my-branch"]
+
+jobs:
+  build-and-audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: TRASH-TO-TRESURE
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: TRASH-TO-TRESURE/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit
+        run: npm audit --audit-level=high || true
+
+      - name: Check for outdated packages
+        run: npm outdated || true
