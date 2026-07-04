@@ -111,7 +111,6 @@ npm run dev     # Development (with hot reload)
 npm start       # Production
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
 
 ### Environment Variables
 
